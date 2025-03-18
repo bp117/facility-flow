@@ -25,7 +25,12 @@ const [processingNode, setProcessingNode] = useState(null);
 const [processedNodes, setProcessedNodes] = useState([]);
 const [statusMessage, setStatusMessage] = useState("Ready to start");
 const [speed, setSpeed] = useState(1000);
-
+// Add after other state declarations
+const [extractedValues, setExtractedValues] = useState({
+  obligor_name: "WEST 30TH STREET LLC",
+  current_value_basis: "As Is",
+  current_value: "130900000"
+});
 // Element data being processed
 const [elementData, setElementData] = useState({
   facility_id: "IQ0015810070003629HFI",
@@ -35,6 +40,8 @@ const [elementData, setElementData] = useState({
   doc_types_used: [],
   relevant_docs: []
 });
+// Add after other state declarations
+const [processedElements, setProcessedElements] = useState([]);
 
 // Mock document data based on the spreadsheet
 const [documentData, setDocumentData] = useState([
@@ -634,6 +641,7 @@ const processSteps = [
     }
   },
   // Step 8: Extract element value
+  // Update the action in Step 9 (Extract element value)
   {
     nodeId: "9",
     message: "Extracting obligor_name from filtered documents",
@@ -641,6 +649,44 @@ const processSteps = [
       updateNodeStyle("8", { opacity: 0.8, border: "2px solid green" });
       updateNodeStyle("9", { opacity: 1, border: "2px solid red" });
       updateEdgeStyle("e8-9", { hidden: false, animated: true, stroke: "red", strokeWidth: 2 });
+      // Add value extraction simulation
+      if (elementData.current_element === "obligor_name") {
+        setExtractedValues(prev => ({
+          ...prev,
+          obligor_name: "WEST 30TH STREET LLC"
+        }));
+      }
+    }
+  },
+  
+  // Update similar extraction steps for other elements
+  // For current_value_basis (Step 14):
+  {
+    nodeId: "9",
+    message: "Extracting current_value_basis from filtered documents",
+    action: () => {
+      updateNodeStyle("8", { opacity: 0.8, border: "2px solid green" });
+      updateNodeStyle("9", { opacity: 1, border: "2px solid red" });
+      updateEdgeStyle("e8-9", { hidden: false, animated: true, stroke: "red", strokeWidth: 2 });
+      setExtractedValues(prev => ({
+        ...prev,
+        current_value_basis: "As Is"
+      }));
+    }
+  },
+  
+  // For current_value (Step 21):
+  {
+    nodeId: "9",
+    message: "Extracting current_value from filtered documents",
+    action: () => {
+      updateNodeStyle("8", { opacity: 0.8, border: "2px solid green" });
+      updateNodeStyle("9", { opacity: 1, border: "2px solid red" });
+      updateEdgeStyle("e8-9", { hidden: false, animated: true, stroke: "red", strokeWidth: 2 });
+      setExtractedValues(prev => ({
+        ...prev,
+        current_value: "130900000"
+      }));
     }
   },
   // Step 9: Skip dependency handling for obligor_name
@@ -661,6 +707,7 @@ const processSteps = [
       updateNodeStyle("10", { opacity: 0.8, border: "2px solid green" });
       updateNodeStyle("12", { opacity: 1, border: "2px solid red" });
       updateEdgeStyle("e10-12", { hidden: false, animated: true, stroke: "red", strokeWidth: 2 });
+      setProcessedElements(prev => [...prev, "obligor_name"]);
     }
   },
   // Step 11: Check for more elements
@@ -731,6 +778,7 @@ const processSteps = [
       updateNodeStyle("11", { opacity: 0.8, border: "2px solid green" });
       updateNodeStyle("10", { opacity: 1, border: "2px solid red" });
       updateEdgeStyle("e11-10", { hidden: false, animated: true, stroke: "orange", strokeWidth: 2 });
+      setProcessedElements(prev => [...prev, "current_value_basis"]);
     }
   },
   // Step 17: Check for more elements again
@@ -811,6 +859,7 @@ const processSteps = [
       updateNodeStyle("11", { opacity: 0.8, border: "2px solid green" });
       updateNodeStyle("10", { opacity: 1, border: "2px solid red" });
       updateEdgeStyle("e11-10", { hidden: false, animated: true, stroke: "orange", strokeWidth: 2 });
+      setProcessedElements(prev => [...prev, "current_value"]);
     }
   },
   // Step 24: Check for more elements final time
@@ -927,6 +976,7 @@ const nextStep = () => {
 // Reset the flow
 const resetFlow = () => {
   // Reset all nodes to initial state
+  setProcessedElements([]);
   setNodes(prevNodes => 
     prevNodes.map(node => ({
       ...node,
@@ -971,6 +1021,13 @@ const resetFlow = () => {
   setTimeout(() => {
     nextStep();
   }, 500);
+   // Reset extracted values
+   setExtractedValues({
+    obligor_name: "",
+    current_value_basis: "",
+    current_value: ""
+  });
+  
 };
 
 // Update the useEffect for auto-play:
@@ -1246,6 +1303,61 @@ return (
               {doc.name.length > 25 ? doc.name.substring(0, 25) + "..." : doc.name}
             </td>
             <td style={{ padding: "3px", borderBottom: "1px solid #eee" }}>{doc.type}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{/* Extracted Values */}
+<div style={{
+  background: "white",
+  padding: "10px",
+  borderRadius: "5px",
+  border: "1px solid #ddd",
+  marginBottom: "15px"
+}}>
+  <div style={{ fontWeight: "bold", marginBottom: "5px", fontSize: "14px" }}>
+    Extracted Values
+  </div>
+  <div style={{ maxHeight: "200px", overflowY: "auto" }}>
+    <table style={{ width: "100%", fontSize: "11px", borderCollapse: "collapse" }}>
+      <thead>
+        <tr>
+          <th style={{ padding: "3px", borderBottom: "1px solid #ccc", textAlign: "left" }}>Element</th>
+          <th style={{ padding: "3px", borderBottom: "1px solid #ccc", textAlign: "left" }}>Value</th>
+          <th style={{ padding: "3px", borderBottom: "1px solid #ccc", textAlign: "left" }}>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {Object.entries(extractedValues).map(([element, value]) => (
+          <tr key={element} style={{
+            backgroundColor: elementData.current_element === element ? "#f0f8ff" : "transparent"
+          }}>
+            <td style={{ 
+              padding: "3px", 
+              borderBottom: "1px solid #eee",
+              fontWeight: elementData.current_element === element ? "bold" : "normal"
+            }}>
+              {element}
+            </td>
+            <td style={{ padding: "3px", borderBottom: "1px solid #eee" }}>
+              {processedElements.includes(element) ? value : (
+                elementData.current_element === element ? 
+                "Extracting..." : 
+                "Not extracted"
+              )}
+            </td>
+            <td style={{ padding: "3px", borderBottom: "1px solid #eee" }}>
+              {processedElements.includes(element) ? (
+                <span style={{ color: "green" }}>✓</span>
+              ) : elementData.current_element === element ? (
+                <span style={{ color: "orange" }}>Processing...</span>
+              ) : (
+                <span style={{ color: "gray" }}>Pending</span>
+              )}
+            </td>
           </tr>
         ))}
       </tbody>
