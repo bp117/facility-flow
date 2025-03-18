@@ -32,7 +32,8 @@ const [elementData, setElementData] = useState({
   current_element: "None",
   dependent_elements: "None", 
   docs_found: 0,
-  doc_types_used: []
+  doc_types_used: [],
+  relevant_docs: []
 });
 
 // Mock document data based on the spreadsheet
@@ -552,10 +553,10 @@ const processSteps = [
       updateNodeStyle("1", { opacity: 0.8, border: "2px solid green" });
       updateNodeStyle("2", { opacity: 1, border: "2px solid red" });
       updateEdgeStyle("e1-2", { hidden: false, animated: true, stroke: "red", strokeWidth: 2 });
-      setElementData({
-        ...elementData,
+      setElementData(prev => ({
+        ...prev,
         docs_found: documentData.length
-      });
+      }));
     }
   },
   // Step 2: Retrieve documents from ICMP API
@@ -589,20 +590,25 @@ const processSteps = [
     }
   },
   // Step 5: Select first element
-  {
-    nodeId: "6",
-    message: "Selecting first element: obligor_name",
-    action: () => {
-      updateNodeStyle("5", { opacity: 0.8, border: "2px solid green" });
-      updateNodeStyle("6", { opacity: 1, border: "2px solid red" });
-      updateEdgeStyle("e5-6", { hidden: false, animated: true, stroke: "red", strokeWidth: 2 });
-      setElementData({
-        ...elementData,
-        current_element: "obligor_name",
-        dependent_elements: "None"
-      });
-    }
-  },
+// Update steps where element changes (e.g., Step 5, 11, 18):
+{
+  nodeId: "6",
+  message: "Selecting first element: obligor_name",
+  action: () => {
+    const currentElement = "obligor_name";
+    const relevantDocs = getRelevantDocs(currentElement);
+    updateNodeStyle("5", { opacity: 0.8, border: "2px solid green" });
+    updateNodeStyle("6", { opacity: 1, border: "2px solid red" });
+    updateEdgeStyle("e5-6", { hidden: false, animated: true, stroke: "red", strokeWidth: 2 });
+    setElementData(prev => ({
+      ...prev,
+      current_element: currentElement,
+      dependent_elements: "None",
+      relevant_docs: relevantDocs,
+      docs_found: relevantDocs.length
+    }));
+  }
+},
   // Step 6: Identify candidate doc types
   {
     nodeId: "7",
@@ -855,6 +861,21 @@ const updateNodeStyle = (id, styleUpdates) => {
 };
 
 // Helper function to update edge styling
+const getRelevantDocs = (element) => {
+  if (!element) return [];
+  
+  // Get priority doc types for current element
+  const elementInfo = elementsData.find(e => e.name === element);
+  if (!elementInfo) return [];
+  
+  const priorityDocTypes = elementInfo.priority_docs.map(p => p.type);
+  
+  // Filter documents that match the priority types
+  return documentData.filter(doc => 
+    priorityDocTypes.includes(doc.type)
+  );
+};
+
 const updateEdgeStyle = (id, styleUpdates) => {
   setEdges(prevEdges => 
     prevEdges.map(edge => {
@@ -1199,35 +1220,38 @@ return (
         
         {/* Available Documents */}
         <div style={{
-          background: "white",
-          padding: "10px",
-          borderRadius: "5px",
-          border: "1px solid #ddd",
-          marginBottom: "15px"
-        }}>
-          <div style={{ fontWeight: "bold", marginBottom: "5px", fontSize: "14px" }}>Available Documents</div>
-          <div style={{ maxHeight: "200px", overflowY: "auto" }}>
-            <table style={{ width: "100%", fontSize: "11px", borderCollapse: "collapse" }}>
-              <thead>
-                <tr>
-                  <th style={{ padding: "3px", borderBottom: "1px solid #ccc", textAlign: "left" }}>Document Name</th>
-                  <th style={{ padding: "3px", borderBottom: "1px solid #ccc", textAlign: "left" }}>Type</th>
-                </tr>
-              </thead>
-              <tbody>
-                {documentData.map((doc) => (
-                  <tr key={doc.id}>
-                    <td style={{ padding: "3px", borderBottom: "1px solid #eee", fontSize: "10px" }}>
-                      {doc.name.length > 25 ? doc.name.substring(0, 25) + "..." : doc.name}
-                    </td>
-                    <td style={{ padding: "3px", borderBottom: "1px solid #eee" }}>{doc.type}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-        
+  background: "white",
+  padding: "10px",
+  borderRadius: "5px",
+  border: "1px solid #ddd",
+  marginBottom: "15px"
+}}>
+  <div style={{ fontWeight: "bold", marginBottom: "5px", fontSize: "14px" }}>
+    {elementData.current_element === "None" 
+      ? "All Available Documents" 
+      : `Relevant Documents for ${elementData.current_element}`}
+  </div>
+  <div style={{ maxHeight: "200px", overflowY: "auto" }}>
+    <table style={{ width: "100%", fontSize: "11px", borderCollapse: "collapse" }}>
+      <thead>
+        <tr>
+          <th style={{ padding: "3px", borderBottom: "1px solid #ccc", textAlign: "left" }}>Document Name</th>
+          <th style={{ padding: "3px", borderBottom: "1px solid #ccc", textAlign: "left" }}>Type</th>
+        </tr>
+      </thead>
+      <tbody>
+        {(elementData.current_element === "None" ? documentData : elementData.relevant_docs).map((doc) => (
+          <tr key={doc.id}>
+            <td style={{ padding: "3px", borderBottom: "1px solid #eee", fontSize: "10px" }}>
+              {doc.name.length > 25 ? doc.name.substring(0, 25) + "..." : doc.name}
+            </td>
+            <td style={{ padding: "3px", borderBottom: "1px solid #eee" }}>{doc.type}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
         {/* Elements Table */}
         <div style={{
           background: "white",
