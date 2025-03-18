@@ -825,4 +825,100 @@ const FacilityDocumentFlow = () => {
                 </tr>
                 <tr>
                   <td style={{ padding: "3px", borderBottom: "1px solid #eee" }}>Element:</td>
-                  <td style={{ padding: "3px", borderBottom: "1px solid #eee", fontWeight: "bold" }}>{elementData.element_name}
+                  <td style={{ padding: "3px", borderBottom: "1px solid #eee", fontWeight: "bold" }}>{elementData.element_name}</td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "3px", borderBottom: "1px solid #eee" }}>Obligor Required:</td>
+                  <td style={{ padding: "3px", borderBottom: "1px solid #eee", fontWeight: "bold" }}>{elementData.obligor_required ? "Yes" : "No"}</td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "3px" }}>Docs Found:</td>
+                  <td style={{ padding: "3px", fontWeight: "bold" }}>{elementData.docs_found}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </Panel>
+        
+        {/* Legend */}
+        <Panel position="bottom-right">
+          <div style={{ 
+            background: "white", 
+            padding: "10px", 
+            borderRadius: "5px",
+            border: "1px solid #ddd",
+            fontSize: "12px"
+          }}>
+            <div style={{ fontWeight: "bold", marginBottom: "5px" }}>Legend</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <div style={{ width: "15px", height: "15px", background: nodeTypes.input, marginRight: "5px", border: "1px solid #333" }}></div>
+                <span>Input</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <div style={{ width: "15px", height: "15px", background: nodeTypes.processing, marginRight: "5px", border: "1px solid #333" }}></div>
+                <span>Processing</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <div style={{ width: "15px", height: "15px", background: nodeTypes.api, marginRight: "5px", border: "1px solid #333" }}></div>
+                <span>API</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <div style={{ width: "15px", height: "15px", background: nodeTypes.ai, marginRight: "5px", border: "1px solid #333" }}></div>
+                <span>AI</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <div style={{ width: "15px", height: "15px", background: nodeTypes.decision, marginRight: "5px", border: "1px solid #333" }}></div>
+                <span>Decision</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <div style={{ width: "15px", height: "15px", background: nodeTypes.output, marginRight: "5px", border: "1px solid #333" }}></div>
+                <span>Output</span>
+              </div>
+            </div>
+            
+            {/* Edge legend */}
+            <div style={{ fontWeight: "bold", marginTop: "10px", marginBottom: "5px" }}>Edge Types</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <div style={{ width: "25px", height: "2px", background: "#999", marginRight: "5px" }}></div>
+                <span>Standard Flow</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <div style={{ width: "25px", height: "2px", background: "#ff9900", marginRight: "5px" }}></div>
+                <span>Conditional Path</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <div style={{ width: "25px", height: "2px", background: "#0088cc", marginRight: "5px", borderStyle: "dashed" }}></div>
+                <span>Loop Back</span>
+              </div>
+            </div>
+          </div>
+        </Panel>
+        
+        {/* Edge Labels Info Panel */}
+        <Panel position="bottom-left">
+          <div style={{ 
+            background: "white", 
+            padding: "10px", 
+            borderRadius: "5px",
+            border: "1px solid #ddd",
+            fontSize: "12px",
+            maxWidth: "300px"
+          }}>
+            <div style={{ fontWeight: "bold", marginBottom: "5px" }}>Edge Labels</div>
+            <div style={{ marginBottom: "8px" }}>
+              The labels on each connection indicate what data is being passed between steps
+              in the process flow. Labels are color-coded to match the edge type.
+            </div>
+            <div style={{ fontStyle: "italic", fontSize: "11px" }}>
+              Note: Edge labels will appear when the animation runs.
+            </div>
+          </div>
+        </Panel>
+      </ReactFlow>
+    </div>
+  );
+};
+
+export default FacilityDocumentFlow;

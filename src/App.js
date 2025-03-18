@@ -3,7 +3,7 @@ import './App.css';
 
 
 import WorkflowDiagram from './FacilityDocumentFlow';
-import FacilityDocumentFlow from './FacilityDoc-rect';
+import FacilityDocumentFlow from './FacilityDoc';
 
 function App() {
   return (
