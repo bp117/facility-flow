@@ -15,7 +15,9 @@ const nodeTypes = {
   api: "#ffd0d0",
   ai: "#e0d0ff",
   decision: "#ffe6cc",
-  output: "#d0f0ff"
+  output: "#d0f0ff",
+  external: "#ffd0d0", // Light red for external/AI operations
+  internal: "#c2f0c2"  // Light green for internal processing
 };
 
 // State for UI controls
@@ -77,6 +79,7 @@ const [elementsData, setElementsData] = useState([
   ]}
 ]);
 
+
 // Define nodes with a more detailed structure
 const [nodes, setNodes] = useState([
   {
@@ -88,7 +91,7 @@ const [nodes, setNodes] = useState([
       details: "User provides facility ID to begin document processing"
     },
     style: { 
-      background: nodeTypes.input, 
+      background: nodeTypes.internal, 
       border: "1px solid #333", 
       width: 180, 
       height: 100, 
@@ -111,7 +114,7 @@ const [nodes, setNodes] = useState([
       details: "Get document list from Excel with doc_name and doc_type"
     },
     style: { 
-      background: nodeTypes.processing, 
+      background: nodeTypes.internal, 
       border: "1px solid #333", 
       width: 180, 
       height: 100, 
@@ -134,7 +137,7 @@ const [nodes, setNodes] = useState([
       details: "Fetch all documents using ICMP API"
     },
     style: { 
-      background: nodeTypes.api, 
+      background: nodeTypes.ai, 
       border: "1px solid #333", 
       width: 180, 
       height: 100, 
@@ -180,7 +183,7 @@ const [nodes, setNodes] = useState([
       details: "Process independent elements first"
     },
     style: { 
-      background: nodeTypes.processing, 
+      background: nodeTypes.internal, 
       border: "1px solid #333", 
       width: 180, 
       height: 100, 
@@ -203,7 +206,7 @@ const [nodes, setNodes] = useState([
       details: "Choose next element based on dependency order"
     },
     style: { 
-      background: nodeTypes.decision, 
+      background: nodeTypes.internal, 
       border: "1px solid #333", 
       width: 180, 
       height: 100, 
@@ -226,7 +229,7 @@ const [nodes, setNodes] = useState([
       details: "Find document types relevant for current element"
     },
     style: { 
-      background: nodeTypes.processing, 
+      background: nodeTypes.internal, 
       border: "1px solid #333", 
       width: 180, 
       height: 100, 
@@ -249,7 +252,7 @@ const [nodes, setNodes] = useState([
       details: "Select latest or earliest document of each type"
     },
     style: { 
-      background: nodeTypes.processing, 
+      background: nodeTypes.internal, 
       border: "1px solid #333", 
       width: 180, 
       height: 100, 
@@ -295,7 +298,7 @@ const [nodes, setNodes] = useState([
       details: "Choose final value based on document type priority"
     },
     style: { 
-      background: nodeTypes.processing, 
+      background: nodeTypes.internal, 
       border: "1px solid #333", 
       width: 180, 
       height: 100, 
@@ -312,13 +315,13 @@ const [nodes, setNodes] = useState([
   {
     id: "11",
     type: "default",
-    position: { x: 850, y: 1250 },
+    position: { x: 75, y: 1250 }, // Changed from x: 850
     data: { 
       label: "Handle Dependencies",
       details: "Replace dependent elements in prompt if needed"
     },
     style: { 
-      background: nodeTypes.processing, 
+      background: nodeTypes.internal, 
       border: "1px solid #333", 
       width: 180, 
       height: 100, 
@@ -335,25 +338,26 @@ const [nodes, setNodes] = useState([
   {
     id: "12",
     type: "default",
-    position: { x: 850, y: 800 },
+    position: { x: 1050, y: 800 },
     data: { 
       label: "More Elements?",
       details: "Check if there are more elements to process"
     },
     style: { 
-      background: nodeTypes.decision, 
-      border: "1px solid #333", 
-      width: 180, 
-      height: 100, 
-      borderRadius: "10px", 
-      display: "flex", 
+      background: nodeTypes.internal,
+      border: "1px solid #333",
+      width: 180,
+      height: 100,
+      borderRadius: "10px",
+      display: "flex",
       flexDirection: "column",
-      alignItems: "center", 
+      alignItems: "center",
       justifyContent: "center",
       textAlign: "center",
       padding: "10px",
-      opacity: 0.5 
-    }
+      opacity: 0.5
+    },
+
   },
   {
     id: "13",
@@ -364,7 +368,7 @@ const [nodes, setNodes] = useState([
       details: "Compare extracted values with expected values"
     },
     style: { 
-      background: nodeTypes.output, 
+      background: nodeTypes.internal, 
       border: "1px solid #333", 
       width: 180, 
       height: 100, 
@@ -420,7 +424,7 @@ const [edges, setEdges] = useState([
     source: "4",
     target: "5",
     animated: false,
-    label: "Dated Documents",
+    label: "Documents with Dates",
     labelStyle: { fill: '#333', fontWeight: 'bold', fontSize: 12 },
     style: { stroke: "#999", strokeWidth: 2 },
     markerEnd: { type: MarkerType.ArrowClosed, width: 20, height: 20, color: "#999" },
@@ -512,7 +516,10 @@ const [edges, setEdges] = useState([
     labelStyle: { fill: '#333', fontWeight: 'bold', fontSize: 12 },
     style: { stroke: "#999", strokeWidth: 2 },
     markerEnd: { type: MarkerType.ArrowClosed, width: 20, height: 20, color: "#999" },
-    hidden: true
+    hidden: true,
+    type: 'smoothstep',
+    sourceHandle: 'right',
+    targetHandle: 'right'
   },
   {
     id: "e12-6",
@@ -523,7 +530,18 @@ const [edges, setEdges] = useState([
     labelStyle: { fill: '#0077b3', fontWeight: 'bold', fontSize: 12 },
     style: { stroke: "#0088cc", strokeWidth: 2, strokeDasharray: "5,5" },
     markerEnd: { type: MarkerType.ArrowClosed, width: 20, height: 20, color: "#0088cc" },
-    hidden: true
+    hidden: true,
+        // Add edge routing
+        type: 'smoothstep',
+        sourceHandle: 'left',
+        targetHandle: 'right',
+        data: {
+          path: [
+            { x: 750, y: 800 },  // Start from More Elements left side
+            { x: 600, y: 750 },  // Control point above target
+            { x: 500, y: 800 }   // End at Select Next Element right side
+          ]
+        }
   },
   {
     id: "e12-13",
@@ -531,11 +549,21 @@ const [edges, setEdges] = useState([
     target: "13",
     animated: false,
     label: "No - All Done",
-    labelStyle: { fill: '#333', fontWeight: 'bold', fontSize: 12 },
+    labelStyle: { 
+      fill: '#333', 
+      fontWeight: 'bold', 
+      fontSize: 12,
+      background: '#fff'
+    },
     style: { stroke: "#999", strokeWidth: 2 },
     markerEnd: { type: MarkerType.ArrowClosed, width: 20, height: 20, color: "#999" },
-    hidden: true
-  }
+    hidden: true,
+    type: 'STRAIGHT',
+    sourceHandle: 'right',
+    targetHandle: 'BOTTOM',
+      // Position label at midpoint
+    zIndex: 1000
+}
 ]);
 
 // Process steps for animation
@@ -603,10 +631,10 @@ const processSteps = [
   message: "Selecting first element: obligor_name",
   action: () => {
     const currentElement = "obligor_name";
-    const relevantDocs = getRelevantDocs(currentElement);
     updateNodeStyle("5", { opacity: 0.8, border: "2px solid green" });
     updateNodeStyle("6", { opacity: 1, border: "2px solid red" });
     updateEdgeStyle("e5-6", { hidden: false, animated: true, stroke: "red", strokeWidth: 2 });
+    const relevantDocs = getRelevantDocs(currentElement);
     setElementData(prev => ({
       ...prev,
       current_element: currentElement,
@@ -911,7 +939,7 @@ const updateNodeStyle = (id, styleUpdates) => {
 
 // Helper function to update edge styling
 const getRelevantDocs = (element) => {
-  if (!element) return [];
+  if (!element || element === "None") return [];
   
   // Get priority doc types for current element
   const elementInfo = elementsData.find(e => e.name === element);
@@ -924,7 +952,6 @@ const getRelevantDocs = (element) => {
     priorityDocTypes.includes(doc.type)
   );
 };
-
 const updateEdgeStyle = (id, styleUpdates) => {
   setEdges(prevEdges => 
     prevEdges.map(edge => {
@@ -1049,11 +1076,19 @@ useEffect(() => {
 //     nextStep();
 //   }
 // }, []);
+useEffect(() => {
+  if (elementData.current_element !== "None") {
+    const relevantDocs = getRelevantDocs(elementData.current_element);
+    setElementData(prev => ({
+      ...prev,
+      relevant_docs: relevantDocs,
+      docs_found: relevantDocs.length
+    }));
+  }
+}, [elementData.current_element]);
 return (
-  <div style={{ width: "100%", height: "2000px", border: "1px solid #ddd" }}>
-    <div style={{ padding: "10px", textAlign: "center", fontWeight: "bold", fontSize: "20px", borderBottom: "1px solid #ccc" }}>
-      FRY14 Document Processing Flow
-    </div>
+  <div style={{ width: "100%", height: "1200px", border: "1px solid #ddd" }}>
+
     
     <div style={{ display: "flex", height: "calc(100% - 41px)" }}>
       {/* Main Flow Panel */}
@@ -1062,25 +1097,68 @@ return (
           nodes={nodes}
           edges={edges}
           fitView
-          fitViewOptions={{ padding: 0.3 }}
+          fitViewOptions={{ padding: 0.2 }}
           defaultZoom={0.8}
-          maxZoom={1.5}
-          minZoom={0.4}
+          maxZoom={1}
+          minZoom={0.2}
           nodesDraggable={false}
           nodesConnectable={false}
           elementsSelectable={false}
           preventScrolling={false}
+         
         >
           <Background color="#f0f0f0" variant="dots" />
           <Controls showInteractive={false} />
           
-          {/* Process Controls Panel */}
-          <Panel position="top-left">
-            <div style={{
+  {/* Move Available Documents to left panel */}
+  <Panel position="top-left" style={{ width: "280px" }}>
+    <div style={{
+      background: "white",
+      padding: "10px",
+      borderRadius: "5px",
+      border: "1px solid #ddd",
+      marginBottom: "10px"
+    }}>
+      <div style={{ fontWeight: "bold", marginBottom: "5px", fontSize: "14px" }}>
+        All Available Documents
+      </div>
+      <div style={{ maxHeight: "200px", overflowY: "auto" }}>
+        <table style={{ width: "100%", fontSize: "11px", borderCollapse: "collapse" }}>
+          <thead>
+            <tr>
+              <th style={{ padding: "3px", borderBottom: "1px solid #ccc", textAlign: "left" }}>Document Name</th>
+              <th style={{ padding: "3px", borderBottom: "1px solid #ccc", textAlign: "left" }}>Type</th>
+            </tr>
+          </thead>
+          <tbody>
+            {documentData.map((doc) => (
+              <tr key={doc.id}>
+                <td style={{ padding: "3px", borderBottom: "1px solid #eee", fontSize: "10px", textAlign: "left" }}>
+                  {doc.name.length > 25 ? doc.name.substring(0, 25) + "..." : doc.name}
+                </td>
+                <td style={{ padding: "3px", borderBottom: "1px solid #eee", textAlign: "left" }}>{doc.type}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </Panel>
+          
+          {/* Legend */}
+ 
+        </ReactFlow>
+      </div>
+      
+      {/* Right Side Panels */}
+      <div style={{ width: "400px", borderLeft: "1px solid #ddd", overflow: "auto", padding: "10px" }}>
+      
+      <div style={{
               background: "white",
               padding: "10px",
               borderRadius: "5px",
-              border: "1px solid #ddd"
+              border: "1px solid #ddd",
+              marginBottom: "10px"
             }}>
               <div style={{ fontWeight: "bold", marginBottom: "8px" }}>Process Controls</div>
               <div style={{ display: "flex", gap: "8px", marginBottom: "10px" }}>
@@ -1142,68 +1220,7 @@ return (
                 </div>
               </div>
             </div>
-          </Panel>
-          
-          {/* Legend */}
-          <Panel position="bottom-left">
-            <div style={{ 
-              background: "white", 
-              padding: "10px", 
-              borderRadius: "5px",
-              border: "1px solid #ddd",
-              fontSize: "12px"
-            }}>
-              <div style={{ fontWeight: "bold", marginBottom: "5px" }}>Legend</div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <div style={{ width: "15px", height: "15px", background: nodeTypes.input, marginRight: "5px", border: "1px solid #333" }}></div>
-                  <span>Input</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <div style={{ width: "15px", height: "15px", background: nodeTypes.processing, marginRight: "5px", border: "1px solid #333" }}></div>
-                  <span>Processing</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <div style={{ width: "15px", height: "15px", background: nodeTypes.api, marginRight: "5px", border: "1px solid #333" }}></div>
-                  <span>API</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <div style={{ width: "15px", height: "15px", background: nodeTypes.ai, marginRight: "5px", border: "1px solid #333" }}></div>
-                  <span>AI</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <div style={{ width: "15px", height: "15px", background: nodeTypes.decision, marginRight: "5px", border: "1px solid #333" }}></div>
-                  <span>Decision</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <div style={{ width: "15px", height: "15px", background: nodeTypes.output, marginRight: "5px", border: "1px solid #333" }}></div>
-                  <span>Output</span>
-                </div>
-              </div>
-              
-              {/* Edge legend */}
-              <div style={{ fontWeight: "bold", marginTop: "10px", marginBottom: "5px" }}>Edge Types</div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <div style={{ width: "25px", height: "2px", background: "#999", marginRight: "5px" }}></div>
-                  <span>Standard Flow</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <div style={{ width: "25px", height: "2px", background: "#ff9900", marginRight: "5px" }}></div>
-                  <span>Conditional Path</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <div style={{ width: "25px", height: "2px", background: "#0088cc", marginRight: "5px", borderStyle: "dashed" }}></div>
-                  <span>Loop Back</span>
-                </div>
-              </div>
-            </div>
-          </Panel>
-        </ReactFlow>
-      </div>
       
-      {/* Right Side Panels */}
-      <div style={{ width: "300px", borderLeft: "1px solid #ddd", overflow: "auto", padding: "10px" }}>
         {/* Process Status */}
         <div style={{
           background: "white",
@@ -1265,18 +1282,18 @@ return (
         }}>
           <div style={{ fontWeight: "bold", marginBottom: "5px", fontSize: "14px" }}>Document Types Used</div>
           {elementData.doc_types_used.length > 0 ? (
-            <ul style={{ margin: "0", paddingLeft: "20px" }}>
+            <ol style={{ margin: "0", paddingLeft: "20px" }}>
               {elementData.doc_types_used.map((docType, index) => (
-                <li key={index} style={{ marginBottom: "3px" }}>{docType}</li>
+                <li key={index} style={{ marginBottom: "3px" , textAlign:'left'}}>{docType}</li>
               ))}
-            </ul>
+            </ol>
           ) : (
             <div style={{ fontStyle: "italic", color: "#666" }}>No document types selected</div>
           )}
         </div>
         
         {/* Available Documents */}
-        <div style={{
+        {/* <div style={{
   background: "white",
   padding: "10px",
   borderRadius: "5px",
@@ -1308,7 +1325,42 @@ return (
       </tbody>
     </table>
   </div>
-</div>
+</div> */}
+
+{/* Relevant Documents */}
+{/* {elementData.current_element !== "None" && (
+  <div style={{
+    background: "white",
+    padding: "10px",
+    borderRadius: "5px",
+    border: "1px solid #ddd",
+    marginBottom: "15px"
+  }}>
+    <div style={{ fontWeight: "bold", marginBottom: "5px", fontSize: "14px" }}>
+      Relevant Documents for {elementData.current_element}
+    </div>
+    <div style={{ maxHeight: "200px", overflowY: "auto" }}>
+      <table style={{ width: "100%", fontSize: "11px", borderCollapse: "collapse" }}>
+        <thead>
+          <tr>
+            <th style={{ padding: "3px", borderBottom: "1px solid #ccc", textAlign: "left" }}>Document Name</th>
+            <th style={{ padding: "3px", borderBottom: "1px solid #ccc", textAlign: "left" }}>Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          {elementData.relevant_docs.map((doc) => (
+            <tr key={doc.id}>
+              <td style={{ padding: "3px", borderBottom: "1px solid #eee", fontSize: "10px", textAlign: "left" }}>
+                {doc.name.length > 25 ? doc.name.substring(0, 25) + "..." : doc.name}
+              </td>
+              <td style={{ padding: "3px", borderBottom: "1px solid #eee", textAlign: "left" }}>{doc.type}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+)}     */}
 
 {/* Extracted Values */}
 <div style={{
